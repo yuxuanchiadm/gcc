@@ -156,6 +156,7 @@ ix86_target_macros_internal (HOST_WIDE_INT isa_flag,
     /* use PROCESSOR_max to not set/unset the arch macro.  */
     case PROCESSOR_max:
       break;
+    case PROCESSOR_INTEL:
     case PROCESSOR_GENERIC32:
     case PROCESSOR_GENERIC64:
       gcc_unreachable ();
@@ -248,6 +249,7 @@ ix86_target_macros_internal (HOST_WIDE_INT isa_flag,
     case PROCESSOR_SLM:
       def_or_undef (parse_in, "__tune_slm__");
       break;
+    case PROCESSOR_INTEL:
     case PROCESSOR_GENERIC32:
     case PROCESSOR_GENERIC64:
       break;
