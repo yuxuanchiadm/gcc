@@ -306,6 +306,7 @@ static bool check_case_bounds (location_t, tree, tree, tree *, tree *,
 static tree handle_packed_attribute (tree *, tree, tree, int, bool *);
 static tree handle_nocommon_attribute (tree *, tree, tree, int, bool *);
 static tree handle_common_attribute (tree *, tree, tree, int, bool *);
+static tree handle_overloadable_attribute (tree *, tree, tree, int, bool *);
 static tree handle_noreturn_attribute (tree *, tree, tree, int, bool *);
 static tree handle_hot_attribute (tree *, tree, tree, int, bool *);
 static tree handle_cold_attribute (tree *, tree, tree, int, bool *);
@@ -833,6 +834,8 @@ const struct attribute_spec c_common_attribute_table[] =
 			      handle_bnd_legacy, false },
   { "bnd_instrument",         0, 0, true, false, false,
 			      handle_bnd_instrument, false },
+  { "overloadable",           0, 0, true, false, false,
+			      handle_overloadable_attribute, false },
   { NULL,                     0, 0, false, false, false, NULL, false }
 };
 
@@ -6636,6 +6639,23 @@ handle_common_attribute (tree *node, tree name, tree ARG_UNUSED (args),
 
   return NULL_TREE;
 }
+
+/* Handle a "overloadable" attribute; arguments as in
+   struct attribute_spec.handler.  */
+
+static tree
+handle_overloadable_attribute (tree *node, tree name, tree ARG_UNUSED (args),
+			   int ARG_UNUSED (flags), bool *no_add_attrs)
+{
+  if (TREE_CODE (*node) != FUNCTION_DECL)
+    {
+      warning (OPT_Wattributes, "%qE attribute ignored", name);
+      *no_add_attrs = true;
+    }
+
+  return NULL_TREE;
+}
+
 
 /* Handle a "noreturn" attribute; arguments as in
    struct attribute_spec.handler.  */
