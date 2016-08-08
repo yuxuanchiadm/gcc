@@ -455,23 +455,12 @@ write_class_enum_type (const tree type)
 	    ::= <function-type>
 	    ::= <class-enum-type>
 	    ::= <array-type>
-	    ::= <pointer-to-member-type>
-	    ::= <template-param>
 	    ::= <substitution>
 	    ::= <CV-qualifier>
 	    ::= P <type>    # pointer-to
-	    ::= R <type>    # reference-to
 	    ::= C <type>    # complex pair (C 2000)
 	    ::= G <type>    # imaginary (C 2000)     [not supported]
 	    ::= U <source-name> <type>   # vendor extended type qualifier
-
-   C++0x extensions
-
-     <type> ::= RR <type>   # rvalue reference-to
-     <type> ::= Dt <expression> # decltype of an id-expression or 
-                                # class member access
-     <type> ::= DT <expression> # decltype of an expression
-     <type> ::= Dn              # decltype of nullptr
 
    TYPE is a type node.  */
 
@@ -564,11 +553,7 @@ write_type (tree type)
 	      break;
 
 	    case POINTER_TYPE:
-	    case REFERENCE_TYPE:
-	      if (TREE_CODE (type) == POINTER_TYPE)
-		write_char ('P');
-              else
-                write_char ('R');
+		  write_char ('P');
 	      {
 		tree target = TREE_TYPE (type);
 		if (TREE_CODE (target) == FUNCTION_TYPE)
