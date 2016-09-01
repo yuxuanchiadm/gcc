@@ -24,6 +24,7 @@ along with GCC; see the file COPYING3.  If not see
 #include "c-tree.h"
 #include "langhooks.h"
 #include "langhooks-def.h"
+#include "c-mangle.h"
 #include "c-objc-common.h"
 
 enum c_language_kind c_language = clk_c;
@@ -35,6 +36,8 @@ enum c_language_kind c_language = clk_c;
 #define LANG_HOOKS_NAME "GNU C"
 #undef LANG_HOOKS_INIT
 #define LANG_HOOKS_INIT c_objc_common_init
+#undef LANG_HOOKS_SET_DECL_ASSEMBLER_NAME
+#define LANG_HOOKS_SET_DECL_ASSEMBLER_NAME mangle_decl
 #undef LANG_HOOKS_INIT_TS
 #define LANG_HOOKS_INIT_TS c_common_init_ts
 

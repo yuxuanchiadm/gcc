@@ -82,7 +82,7 @@ static int find_substitution (tree);
 /* Functions for emitting mangled representations of things.  */
 
 static tree get_mangled_id (tree decl);
-static void write_mangled_name (const tree);
+static void write_mangled_name (const tree, bool);
 static void write_encoding (const tree);
 static void write_name (tree);
 static void write_unscoped_name (const tree);
@@ -111,7 +111,8 @@ static inline const char * finish_mangling (void);
 static tree finish_mangling_get_identifier (void);
 
 /* Utility functions.  */
-static bool tx_safe_fn_type_p (tree t);
+static bool unmangled_name_p (const tree);
+static bool tx_safe_fn_type_p (tree);
 
 /* Append a single character to the end of the mangled
    representation.  */
@@ -228,13 +229,54 @@ find_substitution (tree node)
   return 0;
 }
 
-/* <mangled-name> ::= _Z <encoding>  */
+/* Returns whether DECL's symbol name should be the plain unqualified-id
+   rather than a more complicated mangled name.  */
+
+static bool
+unmangled_name_p (const tree decl)
+{
+  if (TREE_CODE (decl) == FUNCTION_DECL)
+    {
+      /* Declarations with overloadable are mangled.  */
+      if (lookup_attribute ("overloadable", DECL_ATTRIBUTES (decl)))
+	return false;
+
+	  /* Others are not mangled.  */
+	  return true;
+	}
+
+  return true;
+}
+
+/* TOP_LEVEL is true, if this is being called at outermost level of
+  mangling. It should be false when mangling a decl appearing in an
+  expression within some other mangling.
+
+  <mangled-name>      ::= _Z <encoding>  */
 
 static void
-write_mangled_name (const tree decl)
+write_mangled_name (const tree decl, bool top_level)
 {
-  write_string ("_Z");
-  write_encoding (decl);
+  if (unmangled_name_p (decl))
+    {
+      if (top_level)
+	write_string (IDENTIFIER_POINTER (DECL_NAME (decl)));
+      else
+	{
+	  /* The standard notes: "The <encoding> of an extern "C"
+	     function is treated like global-scope data, i.e. as its
+	     <source-name> without a type."  We cannot write
+	     overloaded operators that way though, because it contains
+	     characters invalid in assembler.  */
+	  write_string ("_Z");
+	  write_source_name (DECL_NAME (decl));
+	}
+    }
+  else
+    {
+      write_string ("_Z");
+      write_encoding (decl);
+    }
 }
 
 /* <encoding> ::= <function name> <bare-function-type>  */
@@ -513,13 +555,32 @@ write_type (tree type)
     write_array_type (type);
   else
     {
+      tree type_orig = type;
+
       /* See through any typedefs.  */
       type = TYPE_MAIN_VARIANT (type);
 
       /* Some library classes are passed the same as the scalar type
-		 of their single member and use the samemangling.  */
+		 of their single member and use the same mangling.  */
       if (TREE_CODE (type) == RECORD_TYPE && TYPE_TRANSPARENT_AGGR (type))
 	type = TREE_TYPE (first_field (type));
+
+	  /* Handle any target-specific fundamental types.  */
+	  const char *target_mangling
+	    = targetm.mangle_type (type_orig);
+
+	  if (target_mangling)
+	    {
+	      write_string (target_mangling);
+	      /* Add substitutions for types other than fundamental
+		 types.  */
+	      if (!VOID_TYPE_P (type)
+		  && TREE_CODE (type) != INTEGER_TYPE
+		  && TREE_CODE (type) != REAL_TYPE
+		  && TREE_CODE (type) != BOOLEAN_TYPE)
+		add_substitution (type);
+	      return;
+	    }
 
 	  switch (TREE_CODE (type))
 	    {
@@ -929,7 +990,7 @@ mangle_decl_string (const tree decl)
   if (TREE_CODE (decl) == TYPE_DECL)
     write_type (TREE_TYPE (decl));
   else
-    write_mangled_name (decl);
+    write_mangled_name (decl, true);
 
   result = finish_mangling_get_identifier ();
 
@@ -942,7 +1003,7 @@ static tree
 get_mangled_id (tree decl)
 {
   tree id = mangle_decl_string (decl);
-  return id;
+  return targetm.mangle_decl_assembler_name (decl, id);
 }
 
 void

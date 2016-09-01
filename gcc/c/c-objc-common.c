@@ -58,7 +58,7 @@ c_objc_common_init (void)
 {
   c_init_decl_processing ();
 
-  init_mangle();
+  init_mangle ();
 
   return c_common_init ();
 }
