@@ -235,6 +235,7 @@ find_substitution (tree node)
 static bool
 unmangled_name_p (const tree decl)
 {
+  /* Only functions are mangled.  */
   if (TREE_CODE (decl) == FUNCTION_DECL)
     {
       /* Declarations with overloadable are mangled.  */
@@ -1010,10 +1011,6 @@ void
 mangle_decl (const tree decl)
 {
   tree id;
-
-  // Abort if not function decl
-  if (TREE_CODE (decl) != FUNCTION_DECL)
-    return;
 
   id = get_mangled_id (decl);
 
