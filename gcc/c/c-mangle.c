@@ -261,14 +261,23 @@ write_mangled_name (const tree decl, bool top_level)
   if (unmangled_name_p (decl))
     {
       if (top_level)
-	write_string (IDENTIFIER_POINTER (DECL_NAME (decl)));
+	{
+	  if (TREE_PUBLIC (decl) || DECL_FILE_SCOPE_P (decl))
+		write_string (IDENTIFIER_POINTER (DECL_NAME (decl)));
+	  else
+		{
+		  const char *name = IDENTIFIER_POINTER (DECL_NAME (decl));
+		  char *label;
+
+		  ASM_FORMAT_PRIVATE_NAME (label, name, DECL_UID (decl));
+		  write_string (label);
+		}
+	}
       else
 	{
-	  /* The standard notes: "The <encoding> of an extern "C"
-	     function is treated like global-scope data, i.e. as its
-	     <source-name> without a type."  We cannot write
-	     overloaded operators that way though, because it contains
-	     characters invalid in assembler.  */
+	  /* The standard notes: Non top level decl is treated like
+		 global-scope data, i.e. as its  <source-name> without a
+		 type."  */
 	  write_string ("_Z");
 	  write_source_name (DECL_NAME (decl));
 	}
