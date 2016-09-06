@@ -28,6 +28,7 @@ along with GCC; see the file COPYING3.  If not see
 #include "c-objc-common.h"
 
 enum c_language_kind c_language = clk_c;
+static bool c_init (void);
 
 /* Lang hooks common to C and ObjC are declared in c-objc-common.h;
    consequently, there should be very few hooks below.  */
@@ -35,7 +36,7 @@ enum c_language_kind c_language = clk_c;
 #undef LANG_HOOKS_NAME
 #define LANG_HOOKS_NAME "GNU C"
 #undef LANG_HOOKS_INIT
-#define LANG_HOOKS_INIT c_objc_common_init
+#define LANG_HOOKS_INIT c_init
 #undef LANG_HOOKS_SET_DECL_ASSEMBLER_NAME
 #define LANG_HOOKS_SET_DECL_ASSEMBLER_NAME mangle_decl
 #undef LANG_HOOKS_INIT_TS
@@ -43,5 +44,13 @@ enum c_language_kind c_language = clk_c;
 
 /* Each front end provides its own lang hook initializer.  */
 struct lang_hooks lang_hooks = LANG_HOOKS_INITIALIZER;
+
+static bool
+c_init (void)
+{
+  init_mangle ();
+
+  return c_objc_common_init();
+}
 
 #include "gtype-c.h"

@@ -25,7 +25,6 @@ along with GCC; see the file COPYING3.  If not see
 #include "c-family/c-pretty-print.h"
 #include "tree-pretty-print.h"
 #include "langhooks.h"
-#include "c-mangle.h"
 #include "c-objc-common.h"
 
 static bool c_tree_printer (pretty_printer *, text_info *, const char *,
@@ -57,8 +56,6 @@ bool
 c_objc_common_init (void)
 {
   c_init_decl_processing ();
-
-  init_mangle ();
 
   return c_common_init ();
 }
