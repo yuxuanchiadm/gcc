@@ -28,11 +28,6 @@ along with GCC; see the file COPYING3.  If not see
 #include "attribs.h"
 #include "c-mangle.h"
 
-#define OVERLOAD_TYPE_P(T) \
-  (TREE_CODE (type) == ENUMERAL_TYPE \
-  || TREE_CODE(type) == RECORD_TYPE \
-  || TREE_CODE(type) == UNION_TYPE)
-
 /* Things we only need one of.  This module is not reentrant.  */
 struct GTY(()) c_mangle_globals {
   /* An array of the current substitution candidates, in the order
@@ -538,7 +533,7 @@ write_type (tree type)
        candidates.  */
     {
       tree t = TYPE_MAIN_VARIANT (type);
-      if (TYPE_ATTRIBUTES (t) && !OVERLOAD_TYPE_P (t))
+      if (TYPE_ATTRIBUTES (t))
 	{
 	  tree attrs = NULL_TREE;
 	  if (tx_safe_fn_type_p (type))
