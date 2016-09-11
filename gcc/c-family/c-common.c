@@ -6652,6 +6652,12 @@ handle_overloadable_attribute (tree *node, tree name, tree ARG_UNUSED (args),
       warning (OPT_Wattributes, "%qE attribute ignored", name);
       *no_add_attrs = true;
     }
+  else if (current_function_decl
+	   && !DECL_EXTERNAL (*node))
+    {
+      warning (OPT_Wattributes, "%qE attribute ignored due to function nested", name);
+      *no_add_attrs = true;
+    }
 
   return NULL_TREE;
 }
